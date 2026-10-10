@@ -3,7 +3,7 @@
 Retain is a full-stack web application for tracking personal expenses and managing monthly budgets, built as a summative project.
 
 **Live app:** https://retain-expense-manager.netlify.app
-**Live API:** https://retain-backend-zsyu.onrender.com
+**Live API base URL:** https://retain-backend-zsyu.onrender.com/api (a REST API, not a browsable page — see [API overview](#api-overview) below; try `/api/health` to confirm it's running)
 
 > The backend runs on Render's free tier, which spins down after ~15 minutes of inactivity. The first request after a period of idle may take 30–60 seconds while it wakes back up.
 
