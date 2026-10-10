@@ -5,7 +5,7 @@ import { prisma } from "../config/prisma";
 import { signToken } from "../utils/jwt";
 import { ApiError } from "../utils/ApiError";
 
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = 10;
 
 const registerSchema = z
   .object({

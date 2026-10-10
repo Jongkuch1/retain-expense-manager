@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = 10;
 
 const DEFAULT_CATEGORIES = [
   "Food & Dining",

@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 const prisma = new PrismaClient();
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = 10;
 
 async function main() {
   const email = process.argv[2] ?? process.env.ADMIN_EMAIL ?? "admin@retain.app";
