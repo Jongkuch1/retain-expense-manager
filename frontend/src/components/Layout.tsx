@@ -33,24 +33,24 @@ export function Layout({ children }: { children: ReactNode }) {
             Retain
           </Typography>
           {user && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Button color="inherit" component={Link} to="/dashboard">
+            <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "flex-end", gap: 1 }}>
+              <Button color="inherit" size="small" component={Link} to="/dashboard">
                 Dashboard
               </Button>
-              <Button color="inherit" component={Link} to="/expenses">
+              <Button color="inherit" size="small" component={Link} to="/expenses">
                 Expenses
               </Button>
               {user.role === "ADMIN" && (
-                <Button color="inherit" component={Link} to="/admin">
+                <Button color="inherit" size="small" component={Link} to="/admin">
                   Admin
                 </Button>
               )}
               <Chip
                 label={`${user.name} (${user.role.toLowerCase()})`}
                 size="small"
-                sx={{ bgcolor: "primary.dark", color: "white" }}
+                sx={{ bgcolor: "primary.dark", color: "white", display: { xs: "none", sm: "flex" } }}
               />
-              <Button color="inherit" onClick={handleLogout}>
+              <Button color="inherit" size="small" onClick={handleLogout}>
                 Logout
               </Button>
             </Box>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -36,6 +37,7 @@ export function AdminPage() {
   const [editing, setEditing] = useState<Category | null>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const load = async () => {
     const [i, c] = await Promise.all([adminApi.insights(), categoryApi.list()]);
@@ -78,8 +80,13 @@ export function AdminPage() {
   };
 
   const handleDelete = async (category: Category) => {
-    await categoryApi.remove(category.id);
-    await load();
+    setDeleteError(null);
+    try {
+      await categoryApi.remove(category.id);
+      await load();
+    } catch (err: unknown) {
+      setDeleteError(getErrorMessage(err, "Unable to delete category"));
+    }
   };
 
   return (
@@ -89,7 +96,7 @@ export function AdminPage() {
       </Typography>
 
       {insights && (
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: 2 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr) minmax(0, 1fr)", md: "repeat(4, minmax(0, 1fr))" }, gap: 2 }}>
           <StatCard label="Registered users" value={insights.totalUsers} icon={<GroupOutlinedIcon color="primary" />} />
           <StatCard
             label="Expenses recorded"
@@ -109,7 +116,7 @@ export function AdminPage() {
         </Box>
       )}
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
         <Paper sx={{ p: 3 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}>
             <Typography variant="h6">Categories</Typography>
@@ -117,6 +124,11 @@ export function AdminPage() {
               Add
             </Button>
           </Stack>
+          {deleteError && (
+            <Alert severity="error" sx={{ mb: 1 }} onClose={() => setDeleteError(null)}>
+              {deleteError}
+            </Alert>
+          )}
           <List dense>
             {categories.map((c) => (
               <ListItem
@@ -158,7 +170,7 @@ export function AdminPage() {
         </Paper>
       </Box>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
             Top 5 categories
@@ -187,7 +199,7 @@ export function AdminPage() {
         </Paper>
       </Box>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
             Recently added expenses

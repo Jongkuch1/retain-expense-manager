@@ -20,9 +20,9 @@ export function ExpenseFiltersBar({ categories }: { categories: Category[] }) {
       sx={{
         display: "grid",
         gridTemplateColumns: {
-          xs: "1fr 1fr",
-          sm: "repeat(3, 1fr)",
-          md: "2fr 1.5fr 1.5fr 1.5fr 1.5fr 1fr 1fr 1.5fr",
+          xs: "repeat(2, minmax(0, 1fr))",
+          sm: "repeat(3, minmax(0, 1fr))",
+          md: "minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr)",
         },
         gap: 2,
         mb: 3,

@@ -73,7 +73,7 @@ export function DashboardPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" },
+              gridTemplateColumns: { xs: "minmax(0, 1fr) minmax(0, 1fr)", md: "repeat(4, minmax(0, 1fr))" },
               gap: 2,
             }}
           >
@@ -99,7 +99,7 @@ export function DashboardPage() {
             />
           </Box>
 
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
             <BudgetWidget summary={summary} onSetBudget={handleSetBudget} />
 
             <Paper sx={{ p: 3 }}>

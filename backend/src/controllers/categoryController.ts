@@ -40,9 +40,19 @@ export async function updateCategory(req: Request, res: Response) {
 export async function deleteCategory(req: Request, res: Response) {
   const { id } = req.params;
 
-  const category = await prisma.category.findUnique({ where: { id } });
+  const category = await prisma.category.findUnique({
+    where: { id },
+    include: { _count: { select: { expenses: true } } },
+  });
   if (!category) {
     throw new ApiError(404, "Category not found");
+  }
+
+  if (category._count.expenses > 0) {
+    throw new ApiError(
+      409,
+      `Cannot delete "${category.name}" — it is used by ${category._count.expenses} expense(s). Reassign or delete those expenses first.`,
+    );
   }
 
   await prisma.category.delete({ where: { id } });
