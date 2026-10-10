@@ -9,16 +9,18 @@ Retain is a full-stack web application for tracking personal expenses and managi
 
 ## Features
 
-### All users
+Regular users and admins are functionally separate: sign-up always creates a regular `USER` (admin accounts exist only via seeding), and each role only ever sees its own part of the app — a user has no access to `/admin`, and an admin has no personal Dashboard/Expenses view (they're redirected straight to their own area either way).
+
+### Regular users
 - Sign up, sign in, sign out (React Context-based authentication, JWT-backed)
 - Create, view, update, and delete personal expenses (title, amount, category, date, payment method, notes)
-- Search, filter (category, payment method, date range), and sort (date/amount) expenses — state managed with Redux
+- Search, filter (category, payment method, date range, amount range), and sort (date/amount) expenses — state managed with Redux
 - Paginated expense list
 - Set/update a monthly budget and see total spent, remaining budget, and budget status (within / approaching / over)
 - Dashboard: total spending for the month, remaining budget, highest expense, spending by category, recent expenses
 
-### Admin only (protected via React Context + backend role checks)
-- Create, update, delete expense categories
+### Admins only (protected via React Context + backend role checks)
+- Create, update, delete expense categories — deleting a category that still has expenses reassigns them to a default "Uncategorized" category rather than blocking the deletion or leaving orphaned data; the "Uncategorized" category itself can't be renamed or deleted
 - Platform insights: total users, total expenses, total expense value, expenses this month, spending per category, top 5 / bottom 5 categories, recently added expenses, recently registered users
 
 ## Tech stack

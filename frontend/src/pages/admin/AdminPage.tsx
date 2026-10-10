@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -22,6 +21,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
@@ -37,7 +37,7 @@ import { formatCurrency, formatRelativeTime } from "../../utils/format";
 import { getErrorMessage } from "../../utils/errors";
 
 export function AdminPage() {
-  const navigate = useNavigate();
+  const categoriesRef = useRef<HTMLDivElement | null>(null);
   const [insights, setInsights] = useState<AdminInsights | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -45,6 +45,7 @@ export function AdminPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteNotice, setDeleteNotice] = useState<string | null>(null);
 
   const load = async () => {
     const [i, c] = await Promise.all([adminApi.insights(), categoryApi.list()]);
@@ -88,8 +89,10 @@ export function AdminPage() {
 
   const handleDelete = async (category: Category) => {
     setDeleteError(null);
+    setDeleteNotice(null);
     try {
-      await categoryApi.remove(category.id);
+      const message = await categoryApi.remove(category.id);
+      if (message) setDeleteNotice(message);
       await load();
     } catch (err: unknown) {
       setDeleteError(getErrorMessage(err, "Unable to delete category"));
@@ -124,10 +127,10 @@ export function AdminPage() {
             onClick={openCreate}
           />
           <QuickActionCard
-            icon={<ReceiptLongOutlinedIcon fontSize="large" color="primary" />}
-            title="View all expenses"
-            subtitle="Browse every recorded expense"
-            onClick={() => navigate("/expenses")}
+            icon={<CategoryOutlinedIcon fontSize="large" color="primary" />}
+            title="Manage categories"
+            subtitle="Jump to the category list"
+            onClick={() => categoriesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
           />
           <QuickActionCard
             icon={<RefreshOutlinedIcon fontSize="large" color="primary" />}
@@ -170,7 +173,7 @@ export function AdminPage() {
       )}
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
-        <Paper sx={{ p: 3 }}>
+        <Paper ref={categoriesRef} sx={{ p: 3 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               Categories
@@ -184,19 +187,30 @@ export function AdminPage() {
               {deleteError}
             </Alert>
           )}
+          {deleteNotice && (
+            <Alert severity="success" sx={{ mb: 1 }} onClose={() => setDeleteNotice(null)}>
+              {deleteNotice}
+            </Alert>
+          )}
           <List dense>
             {categories.map((c) => (
               <ListItem
                 key={c.id}
                 secondaryAction={
-                  <Stack direction="row">
-                    <IconButton size="small" onClick={() => openEdit(c)}>
-                      <EditOutlinedIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => handleDelete(c)}>
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
+                  c.isDefault ? (
+                    <Typography variant="caption" color="text.secondary">
+                      Default
+                    </Typography>
+                  ) : (
+                    <Stack direction="row">
+                      <IconButton size="small" onClick={() => openEdit(c)}>
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => handleDelete(c)}>
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  )
                 }
               >
                 <ListItemText primary={c.name} />

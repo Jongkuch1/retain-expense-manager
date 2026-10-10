@@ -15,7 +15,15 @@ const DEFAULT_CATEGORIES = [
   "Other",
 ];
 
+const UNCATEGORIZED = "Uncategorized";
+
 async function main() {
+  await prisma.category.upsert({
+    where: { name: UNCATEGORIZED },
+    update: { isDefault: true },
+    create: { name: UNCATEGORIZED, isDefault: true },
+  });
+
   for (const name of DEFAULT_CATEGORIES) {
     await prisma.category.upsert({ where: { name }, update: {}, create: { name } });
   }

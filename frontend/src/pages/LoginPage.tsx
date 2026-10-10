@@ -18,8 +18,8 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
-      navigate("/dashboard");
+      const loggedInUser = await login(email, password);
+      navigate(loggedInUser.role === "ADMIN" ? "/admin" : "/dashboard");
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Unable to sign in"));
     } finally {

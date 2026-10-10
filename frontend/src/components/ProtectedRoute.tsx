@@ -17,6 +17,10 @@ export function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
+  if (user.role === "ADMIN") {
+    return <Navigate to="/admin" replace />;
+  }
+
   return <Outlet />;
 }
 

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, BrowserRouter, Routes } from "react-router-dom";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { Provider } from "react-redux";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeModeProvider, useThemeMode } from "./context/ThemeModeContext";
 import { store } from "./app/store";
 import { Layout } from "./components/Layout";
@@ -16,6 +16,13 @@ import { AdminPage } from "./pages/admin/AdminPage";
 
 function PageLayout({ title, children }: { title: string; children: ReactNode }) {
   return <Layout title={title}>{children}</Layout>;
+}
+
+function RootRedirect() {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={user.role === "ADMIN" ? "/admin" : "/dashboard"} replace />;
 }
 
 function ThemedApp() {
@@ -78,8 +85,8 @@ function ThemedApp() {
                 />
               </Route>
 
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="*" element={<RootRedirect />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>

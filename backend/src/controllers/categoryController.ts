@@ -33,6 +33,10 @@ export async function updateCategory(req: Request, res: Response) {
     throw new ApiError(404, "Category not found");
   }
 
+  if (category.isDefault) {
+    throw new ApiError(400, "The default Uncategorized category cannot be renamed");
+  }
+
   const updated = await prisma.category.update({ where: { id }, data });
   res.json({ category: updated });
 }
@@ -48,11 +52,23 @@ export async function deleteCategory(req: Request, res: Response) {
     throw new ApiError(404, "Category not found");
   }
 
+  if (category.isDefault) {
+    throw new ApiError(400, "The default Uncategorized category cannot be deleted");
+  }
+
   if (category._count.expenses > 0) {
-    throw new ApiError(
-      409,
-      `Cannot delete "${category.name}" — it is used by ${category._count.expenses} expense(s). Reassign or delete those expenses first.`,
-    );
+    const fallback = await prisma.category.findFirst({ where: { isDefault: true } });
+    if (!fallback) {
+      throw new ApiError(500, "No default category available to reassign expenses to");
+    }
+
+    await prisma.$transaction([
+      prisma.expense.updateMany({ where: { categoryId: id }, data: { categoryId: fallback.id } }),
+      prisma.category.delete({ where: { id } }),
+    ]);
+    return res.status(200).json({
+      message: `Deleted "${category.name}" and moved ${category._count.expenses} expense(s) to "${fallback.name}"`,
+    });
   }
 
   await prisma.category.delete({ where: { id } });

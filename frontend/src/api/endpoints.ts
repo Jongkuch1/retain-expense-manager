@@ -61,7 +61,8 @@ export const categoryApi = {
     return data.category;
   },
   async remove(id: string) {
-    await api.delete(`/categories/${id}`);
+    const { data } = await api.delete<{ message?: string } | undefined>(`/categories/${id}`);
+    return data?.message ?? null;
   },
 };
 

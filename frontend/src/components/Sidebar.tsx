@@ -28,13 +28,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth();
   const location = useLocation();
 
-  const items: NavItem[] = [
-    { label: "Dashboard", to: "/dashboard", icon: <SpaceDashboardOutlinedIcon /> },
-    { label: "Expenses", to: "/expenses", icon: <ReceiptLongOutlinedIcon /> },
-  ];
-  if (user?.role === "ADMIN") {
-    items.push({ label: "Admin", to: "/admin", icon: <AdminPanelSettingsOutlinedIcon /> });
-  }
+  const isAdmin = user?.role === "ADMIN";
+  const items: NavItem[] = isAdmin
+    ? [{ label: "Admin", to: "/admin", icon: <AdminPanelSettingsOutlinedIcon /> }]
+    : [
+        { label: "Dashboard", to: "/dashboard", icon: <SpaceDashboardOutlinedIcon /> },
+        { label: "Expenses", to: "/expenses", icon: <ReceiptLongOutlinedIcon /> },
+      ];
 
   return (
     <Box
