@@ -6,14 +6,16 @@ import { ApiError } from "../utils/ApiError";
 
 const paymentMethods = ["CASH", "CARD", "BANK_TRANSFER", "MOBILE_MONEY", "OTHER"] as const;
 
-const expenseSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  amount: z.number().positive("Amount must be greater than 0"),
-  date: z.coerce.date(),
-  paymentMethod: z.enum(paymentMethods).default("CASH"),
-  notes: z.string().optional().nullable(),
-  categoryId: z.string().min(1, "Category is required"),
-});
+const expenseSchema = z
+  .object({
+    title: z.string().trim().min(1, "Title is required").max(200),
+    amount: z.number().positive("Amount must be greater than 0").max(1_000_000_000),
+    date: z.coerce.date(),
+    paymentMethod: z.enum(paymentMethods).default("CASH"),
+    notes: z.string().trim().max(2000).optional().nullable(),
+    categoryId: z.string().min(1, "Category is required"),
+  })
+  .strict();
 
 const querySchema = z.object({
   search: z.string().optional(),

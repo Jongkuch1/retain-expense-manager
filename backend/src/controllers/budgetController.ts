@@ -2,11 +2,13 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
 
-const budgetSchema = z.object({
-  month: z.number().int().min(1).max(12),
-  year: z.number().int().min(2000).max(2100),
-  amount: z.number().nonnegative("Budget amount cannot be negative"),
-});
+const budgetSchema = z
+  .object({
+    month: z.number().int().min(1).max(12),
+    year: z.number().int().min(2000).max(2100),
+    amount: z.number().nonnegative("Budget amount cannot be negative").max(1_000_000_000),
+  })
+  .strict();
 
 export async function getBudget(req: Request, res: Response) {
   const userId = req.user!.userId;

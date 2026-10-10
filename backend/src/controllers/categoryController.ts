@@ -3,9 +3,11 @@ import { z } from "zod";
 import { prisma } from "../config/prisma";
 import { ApiError } from "../utils/ApiError";
 
-const categorySchema = z.object({
-  name: z.string().min(1, "Category name is required"),
-});
+const categorySchema = z
+  .object({
+    name: z.string().trim().min(1, "Category name is required").max(60),
+  })
+  .strict();
 
 export async function listCategories(_req: Request, res: Response) {
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });

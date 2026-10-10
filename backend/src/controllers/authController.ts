@@ -5,16 +5,22 @@ import { prisma } from "../config/prisma";
 import { signToken } from "../utils/jwt";
 import { ApiError } from "../utils/ApiError";
 
-const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+const BCRYPT_ROUNDS = 12;
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1, "Password is required"),
-});
+const registerSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required").max(100),
+    email: z.string().trim().toLowerCase().email().max(254),
+    password: z.string().min(6, "Password must be at least 6 characters").max(72),
+  })
+  .strict();
+
+const loginSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().email().max(254),
+    password: z.string().min(1, "Password is required").max(72),
+  })
+  .strict();
 
 function toPublicUser(user: { id: string; name: string; email: string; role: string }) {
   return { id: user.id, name: user.name, email: user.email, role: user.role };
@@ -28,7 +34,7 @@ export async function register(req: Request, res: Response) {
     throw new ApiError(409, "An account with this email already exists");
   }
 
-  const hashed = await bcrypt.hash(data.password, 10);
+  const hashed = await bcrypt.hash(data.password, BCRYPT_ROUNDS);
 
   const user = await prisma.user.create({
     data: {

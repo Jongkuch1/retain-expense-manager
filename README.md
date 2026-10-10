@@ -59,7 +59,7 @@ cd backend
 cp .env.example .env     # fill in DATABASE_URL and JWT_SECRET
 npm install
 npx prisma migrate dev   # creates tables
-npx tsx prisma/seed.ts   # seeds default categories + an admin user (admin@retain.app / Admin123!)
+npx tsx prisma/seed.ts   # seeds default categories + an admin user; prints a random admin password once (save it)
 npm run dev              # starts on http://localhost:4000
 ```
 
@@ -72,12 +72,12 @@ npm install
 npm run dev              # starts on http://localhost:5173
 ```
 
-Sign-up always creates a regular `USER` — there is no self-service way to become an admin. The only admin account is the one created by `prisma/seed.ts` (`admin@retain.app` / `Admin123!`); change its password after first login in a real deployment, and create any further admins directly in the database or by extending the seed script.
+Sign-up always creates a regular `USER` — there is no self-service way to become an admin. The only admin account is the one created by `prisma/seed.ts` (email `admin@retain.app` by default, or set `ADMIN_EMAIL`); its password is either a random value printed once when the seed runs, or whatever you set as `ADMIN_PASSWORD` before running it. To rotate an existing admin's password later, run `npm run rotate-admin-password -- <email>` (or set `NEW_PASSWORD` to choose it yourself instead of getting a random one) — it prints the new password once. Create any further admins directly in the database or by extending the seed script.
 
 ## Deployment
 
 - **Frontend**: deployed to Netlify (build command `npm run build`, publish directory `dist`; see `netlify.toml`). `VITE_API_URL` is set to the backend's `/api` URL in Netlify's environment variables.
-- **Backend**: deployed to Render as a free Node web service, with a managed free-tier PostgreSQL database in the same Render account. Environment variables: `DATABASE_URL` (the database's connection string), `JWT_SECRET`, and `CORS_ORIGIN` (the Netlify URL above). Render runs `npx prisma migrate deploy` before starting the server on every deploy. (`render.yaml` describes this setup as a blueprint; `railway.json` is left over from an earlier attempt at deploying on Railway instead and isn't used.)
+- **Backend**: deployed to Render as a free Node web service, with a managed free-tier PostgreSQL database in the same Render account. Environment variables: `DATABASE_URL` (the database's connection string), `JWT_SECRET`, and `CORS_ORIGIN` (the Netlify URL above — must be set to a real origin; there is no wildcard fallback). Render runs `npx prisma migrate deploy` before starting the server on every deploy. `render.yaml` describes this setup as a blueprint.
 
 ## API overview
 
