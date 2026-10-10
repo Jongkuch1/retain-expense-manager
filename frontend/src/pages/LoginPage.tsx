@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Alert, Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errors";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -19,8 +20,8 @@ export function LoginPage() {
     try {
       await login(email, password);
       navigate("/dashboard");
-    } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Unable to sign in");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Unable to sign in"));
     } finally {
       setSubmitting(false);
     }

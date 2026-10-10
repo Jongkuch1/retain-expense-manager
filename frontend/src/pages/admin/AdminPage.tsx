@@ -27,6 +27,7 @@ import { adminApi, categoryApi } from "../../api/endpoints";
 import type { AdminInsights, Category } from "../../types";
 import { StatCard } from "../../components/StatCard";
 import { formatCurrency, formatDate } from "../../utils/format";
+import { getErrorMessage } from "../../utils/errors";
 
 export function AdminPage() {
   const [insights, setInsights] = useState<AdminInsights | null>(null);
@@ -71,8 +72,8 @@ export function AdminPage() {
       }
       setDialogOpen(false);
       await load();
-    } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Unable to save category");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Unable to save category"));
     }
   };
 

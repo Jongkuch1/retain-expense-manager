@@ -28,7 +28,6 @@ export async function register(req: Request, res: Response) {
     throw new ApiError(409, "An account with this email already exists");
   }
 
-  const isFirstUser = (await prisma.user.count()) === 0;
   const hashed = await bcrypt.hash(data.password, 10);
 
   const user = await prisma.user.create({
@@ -36,7 +35,7 @@ export async function register(req: Request, res: Response) {
       name: data.name,
       email: data.email,
       password: hashed,
-      role: isFirstUser ? "ADMIN" : "USER",
+      role: "USER",
     },
   });
 

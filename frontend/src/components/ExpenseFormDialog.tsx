@@ -10,7 +10,8 @@ import {
   TextField,
 } from "@mui/material";
 import { PAYMENT_METHODS } from "../types";
-import type { Category, Expense, ExpenseInput } from "../types";
+import type { Category, Expense, ExpenseInput, PaymentMethod } from "../types";
+import { getErrorMessage } from "../utils/errors";
 
 interface Props {
   open: boolean;
@@ -60,8 +61,8 @@ export function ExpenseFormDialog({ open, categories, initialExpense, onClose, o
     try {
       await onSubmit(form);
       onClose();
-    } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Unable to save expense");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Unable to save expense"));
     } finally {
       setSubmitting(false);
     }
@@ -116,7 +117,7 @@ export function ExpenseFormDialog({ open, categories, initialExpense, onClose, o
             select
             label="Payment method"
             value={form.paymentMethod}
-            onChange={(e) => setForm({ ...form, paymentMethod: e.target.value as any })}
+            onChange={(e) => setForm({ ...form, paymentMethod: e.target.value as PaymentMethod })}
             fullWidth
           >
             {PAYMENT_METHODS.map((pm) => (

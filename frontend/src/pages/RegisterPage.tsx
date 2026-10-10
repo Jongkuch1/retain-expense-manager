@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Alert, Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errors";
 
 export function RegisterPage() {
   const { register } = useAuth();
@@ -20,8 +21,8 @@ export function RegisterPage() {
     try {
       await register(name, email, password);
       navigate("/dashboard");
-    } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Unable to create account");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Unable to create account"));
     } finally {
       setSubmitting(false);
     }
