@@ -17,6 +17,8 @@ export interface ExpenseQuery {
   paymentMethod?: string;
   startDate?: string;
   endDate?: string;
+  minAmount?: number;
+  maxAmount?: number;
   sortBy?: "date" | "amount";
   sortOrder?: "asc" | "desc";
   page?: number;

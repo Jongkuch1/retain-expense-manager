@@ -21,6 +21,8 @@ const querySchema = z.object({
   paymentMethod: z.enum(paymentMethods).optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
+  minAmount: z.coerce.number().nonnegative().optional(),
+  maxAmount: z.coerce.number().nonnegative().optional(),
   sortBy: z.enum(["date", "amount"]).default("date"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   page: z.coerce.number().int().min(1).default(1),
@@ -41,6 +43,14 @@ export async function listExpenses(req: Request, res: Response) {
           date: {
             ...(q.startDate ? { gte: q.startDate } : {}),
             ...(q.endDate ? { lte: q.endDate } : {}),
+          },
+        }
+      : {}),
+    ...(q.minAmount !== undefined || q.maxAmount !== undefined
+      ? {
+          amount: {
+            ...(q.minAmount !== undefined ? { gte: q.minAmount } : {}),
+            ...(q.maxAmount !== undefined ? { lte: q.maxAmount } : {}),
           },
         }
       : {}),

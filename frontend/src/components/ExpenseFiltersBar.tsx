@@ -1,6 +1,7 @@
 import { Box, MenuItem, TextField } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
+  setAmountRange,
   setCategoryId,
   setDateRange,
   setPaymentMethod,
@@ -21,7 +22,7 @@ export function ExpenseFiltersBar({ categories }: { categories: Category[] }) {
         gridTemplateColumns: {
           xs: "1fr 1fr",
           sm: "repeat(3, 1fr)",
-          md: "2fr 1.5fr 1.5fr 1.5fr 1.5fr 1.5fr",
+          md: "2fr 1.5fr 1.5fr 1.5fr 1.5fr 1fr 1fr 1.5fr",
         },
         gap: 2,
         mb: 3,
@@ -81,6 +82,24 @@ export function ExpenseFiltersBar({ categories }: { categories: Category[] }) {
         slotProps={{ inputLabel: { shrink: true } }}
         value={filters.endDate}
         onChange={(e) => dispatch(setDateRange({ startDate: filters.startDate, endDate: e.target.value }))}
+      />
+      <TextField
+        label="Min amount"
+        type="number"
+        fullWidth
+        size="small"
+        value={filters.minAmount}
+        onChange={(e) => dispatch(setAmountRange({ minAmount: e.target.value, maxAmount: filters.maxAmount }))}
+        slotProps={{ htmlInput: { min: "0", step: "0.01" } }}
+      />
+      <TextField
+        label="Max amount"
+        type="number"
+        fullWidth
+        size="small"
+        value={filters.maxAmount}
+        onChange={(e) => dispatch(setAmountRange({ minAmount: filters.minAmount, maxAmount: e.target.value }))}
+        slotProps={{ htmlInput: { min: "0", step: "0.01" } }}
       />
       <TextField
         select

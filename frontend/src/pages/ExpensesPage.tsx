@@ -33,6 +33,8 @@ export function ExpensesPage() {
         paymentMethod: filters.paymentMethod || undefined,
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
+        minAmount: filters.minAmount ? Number(filters.minAmount) : undefined,
+        maxAmount: filters.maxAmount ? Number(filters.maxAmount) : undefined,
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder,
         page: filters.page,

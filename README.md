@@ -70,7 +70,7 @@ npm install
 npm run dev              # starts on http://localhost:5173
 ```
 
-The first user to register is automatically promoted to `ADMIN`; everyone after that is a regular `USER`. (The seed script also creates a default admin account — change its password after first login in a real deployment.)
+Sign-up always creates a regular `USER` — there is no self-service way to become an admin. The only admin account is the one created by `prisma/seed.ts` (`admin@retain.app` / `Admin123!`); change its password after first login in a real deployment, and create any further admins directly in the database or by extending the seed script.
 
 ## Deployment
 
@@ -88,7 +88,7 @@ Base URL: `/api`. All routes except `/auth/register` and `/auth/login` require `
 | GET | `/auth/me` | Current user | Authenticated |
 | GET | `/categories` | List categories | Authenticated |
 | POST/PUT/DELETE | `/categories` | Manage categories | Admin |
-| GET | `/expenses` | List own expenses (search/filter/sort/paginate via query params) | Authenticated |
+| GET | `/expenses` | List own expenses — query params: `search`, `categoryId`, `paymentMethod`, `startDate`/`endDate`, `minAmount`/`maxAmount`, `sortBy` (`date`\|`amount`), `sortOrder`, `page`, `pageSize` | Authenticated |
 | POST/PUT/DELETE | `/expenses/:id` | Manage own expenses | Authenticated |
 | GET | `/expenses/dashboard/summary` | Monthly dashboard summary | Authenticated |
 | GET/PUT | `/budgets` | Get/set monthly budget | Authenticated |

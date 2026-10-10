@@ -10,6 +10,8 @@ export interface ExpenseFiltersState {
   paymentMethod: string;
   startDate: string;
   endDate: string;
+  minAmount: string;
+  maxAmount: string;
   sortBy: SortBy;
   sortOrder: SortOrder;
   page: number;
@@ -22,6 +24,8 @@ const initialState: ExpenseFiltersState = {
   paymentMethod: "",
   startDate: "",
   endDate: "",
+  minAmount: "",
+  maxAmount: "",
   sortBy: "date",
   sortOrder: "desc",
   page: 1,
@@ -49,6 +53,11 @@ const filtersSlice = createSlice({
       state.endDate = action.payload.endDate;
       state.page = 1;
     },
+    setAmountRange(state, action: PayloadAction<{ minAmount: string; maxAmount: string }>) {
+      state.minAmount = action.payload.minAmount;
+      state.maxAmount = action.payload.maxAmount;
+      state.page = 1;
+    },
     setSort(state, action: PayloadAction<{ sortBy: SortBy; sortOrder: SortOrder }>) {
       state.sortBy = action.payload.sortBy;
       state.sortOrder = action.payload.sortOrder;
@@ -67,6 +76,7 @@ export const {
   setCategoryId,
   setPaymentMethod,
   setDateRange,
+  setAmountRange,
   setSort,
   setPage,
   resetFilters,
