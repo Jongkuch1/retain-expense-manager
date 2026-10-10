@@ -1,18 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, MenuItem, Paper, Stack, TextField, Typography } from "@mui/material";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import { budgetApi, expenseApi } from "../api/endpoints";
 import type { DashboardSummary } from "../types";
 import { StatCard } from "../components/StatCard";
+import { QuickActionCard } from "../components/QuickActionCard";
+import { ActivityItem } from "../components/ActivityItem";
 import { BudgetWidget } from "../components/BudgetWidget";
-import { formatCurrency, formatDate, MONTH_NAMES } from "../utils/format";
+import { formatCurrency, formatRelativeTime, MONTH_NAMES } from "../utils/format";
 
 const now = new Date();
 
 export function DashboardPage() {
+  const navigate = useNavigate();
+  const budgetRef = useRef<HTMLDivElement | null>(null);
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -40,6 +49,17 @@ export function DashboardPage() {
 
   const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - 2 + i);
 
+  const budgetUsedPercent =
+    summary?.budget && summary.budget > 0 ? Math.min(100, (summary.totalSpent / summary.budget) * 100) : undefined;
+  const remainingPercent =
+    summary?.budget && summary.budget > 0 && summary.remaining !== null
+      ? Math.max(0, Math.min(100, (summary.remaining / summary.budget) * 100))
+      : undefined;
+  const highestShareOfSpend =
+    summary?.highestExpense && summary.totalSpent > 0
+      ? (summary.highestExpense.amount / summary.totalSpent) * 100
+      : undefined;
+
   return (
     <Stack spacing={3}>
       <Stack
@@ -48,7 +68,7 @@ export function DashboardPage() {
         sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
       >
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Dashboard
+          Dashboard overview
         </Typography>
         <Stack direction="row" spacing={2}>
           <TextField select label="Month" size="small" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
@@ -68,6 +88,39 @@ export function DashboardPage() {
         </Stack>
       </Stack>
 
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          Quick actions
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(3, minmax(0, 1fr))" },
+            gap: 2,
+          }}
+        >
+          <QuickActionCard
+            highlighted
+            icon={<AddCircleOutlineOutlinedIcon fontSize="large" />}
+            title="Add expense"
+            subtitle="Record a new expense"
+            onClick={() => navigate("/expenses?new=1")}
+          />
+          <QuickActionCard
+            icon={<SavingsOutlinedIcon fontSize="large" color="primary" />}
+            title="Set budget"
+            subtitle="Update this month's budget"
+            onClick={() => budgetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+          />
+          <QuickActionCard
+            icon={<ReceiptLongOutlinedIcon fontSize="large" color="primary" />}
+            title="View all expenses"
+            subtitle="Search, filter and sort"
+            onClick={() => navigate("/expenses")}
+          />
+        </Box>
+      </Paper>
+
       {!loading && summary && (
         <>
           <Box
@@ -80,30 +133,42 @@ export function DashboardPage() {
             <StatCard
               label="Total spent"
               value={formatCurrency(summary.totalSpent)}
-              icon={<PaidOutlinedIcon color="primary" />}
+              icon={<PaidOutlinedIcon />}
+              accentColor="#2e7d32"
+              progress={budgetUsedPercent}
+              caption={budgetUsedPercent !== undefined ? `${budgetUsedPercent.toFixed(0)}% of budget used` : undefined}
             />
             <StatCard
               label="Remaining budget"
               value={summary.remaining !== null ? formatCurrency(summary.remaining) : "—"}
-              icon={<AccountBalanceWalletOutlinedIcon color="primary" />}
+              icon={<AccountBalanceWalletOutlinedIcon />}
+              accentColor="#1565c0"
+              progress={remainingPercent}
+              caption={remainingPercent !== undefined ? `${remainingPercent.toFixed(0)}% of budget left` : undefined}
             />
             <StatCard
               label="Highest expense"
               value={summary.highestExpense ? formatCurrency(summary.highestExpense.amount) : "—"}
-              icon={<TrendingUpOutlinedIcon color="primary" />}
+              icon={<TrendingUpOutlinedIcon />}
+              accentColor="#ef6c00"
+              progress={highestShareOfSpend}
+              caption={highestShareOfSpend !== undefined ? `${highestShareOfSpend.toFixed(0)}% of total spend` : undefined}
             />
             <StatCard
               label="Recorded expenses"
               value={summary.recentExpenses.length}
-              icon={<ListAltOutlinedIcon color="primary" />}
+              icon={<ListAltOutlinedIcon />}
+              accentColor="#6a1b9a"
             />
           </Box>
 
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
-            <BudgetWidget summary={summary} onSetBudget={handleSetBudget} />
+            <Box ref={budgetRef}>
+              <BudgetWidget summary={summary} onSetBudget={handleSetBudget} />
+            </Box>
 
             <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
                 Spending by category
               </Typography>
               {summary.spendingByCategory.length === 0 ? (
@@ -122,23 +187,26 @@ export function DashboardPage() {
           </Box>
 
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Recent expenses
+            <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
+              Recent activity
             </Typography>
             {summary.recentExpenses.length === 0 ? (
               <Typography color="text.secondary">No expenses recorded this month.</Typography>
             ) : (
-              <Stack spacing={1}>
+              <Stack>
                 {summary.recentExpenses.map((e) => (
-                  <Stack key={e.id} direction="row" sx={{ justifyContent: "space-between" }}>
-                    <Stack>
-                      <Typography sx={{ fontWeight: 500 }}>{e.title}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {e.category.name} · {formatDate(e.date)}
+                  <ActivityItem
+                    key={e.id}
+                    icon={<CategoryOutlinedIcon fontSize="small" />}
+                    iconColor="#2e7d32"
+                    title={e.title}
+                    subtitle={`${e.category.name} · ${formatRelativeTime(e.createdAt)}`}
+                    trailing={
+                      <Typography sx={{ fontWeight: 600 }} noWrap>
+                        {formatCurrency(e.amount)}
                       </Typography>
-                    </Stack>
-                    <Typography sx={{ fontWeight: 600 }}>{formatCurrency(e.amount)}</Typography>
-                  </Stack>
+                    }
+                  />
                 ))}
               </Stack>
             )}

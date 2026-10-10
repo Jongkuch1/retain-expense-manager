@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import { useSearchParams } from "react-router-dom";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { categoryApi, expenseApi } from "../api/endpoints";
@@ -12,16 +13,24 @@ import { setPage } from "../features/filters/filtersSlice";
 export function ExpensesPage() {
   const filters = useAppSelector((state) => state.filters);
   const dispatch = useAppDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [data, setData] = useState<PaginatedExpenses | null>(null);
   const [loading, setLoading] = useState(true);
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(searchParams.get("new") === "1");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
 
   useEffect(() => {
     categoryApi.list().then(setCategories);
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setSearchParams({}, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadExpenses = async () => {
@@ -79,10 +88,7 @@ export function ExpensesPage() {
 
   return (
     <Stack spacing={3}>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Expenses
-        </Typography>
+      <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate}>
           Add expense
         </Button>

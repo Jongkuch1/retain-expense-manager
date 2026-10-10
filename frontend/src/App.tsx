@@ -1,7 +1,10 @@
+import { useMemo } from "react";
+import type { ReactNode } from "react";
 import { Navigate, Route, BrowserRouter, Routes } from "react-router-dom";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { Provider } from "react-redux";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeModeProvider, useThemeMode } from "./context/ThemeModeContext";
 import { store } from "./app/store";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute, AdminRoute } from "./components/ProtectedRoute";
@@ -11,19 +14,30 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ExpensesPage } from "./pages/ExpensesPage";
 import { AdminPage } from "./pages/admin/AdminPage";
 
-const theme = createTheme({
-  palette: {
-    primary: { main: "#2e7d32" },
-    secondary: { main: "#ff8f00" },
-  },
-  shape: { borderRadius: 10 },
-});
-
-function AppLayoutRoute({ children }: { children: React.ReactNode }) {
-  return <Layout>{children}</Layout>;
+function PageLayout({ title, children }: { title: string; children: ReactNode }) {
+  return <Layout title={title}>{children}</Layout>;
 }
 
-export default function App() {
+function ThemedApp() {
+  const { mode } = useThemeMode();
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          primary: { main: "#2e7d32" },
+          secondary: { main: "#ff8f00" },
+          background:
+            mode === "dark"
+              ? { default: "#0f1613", paper: "#16211c" }
+              : { default: "#f6f8f7", paper: "#ffffff" },
+        },
+        shape: { borderRadius: 10 },
+      }),
+    [mode],
+  );
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -38,17 +52,17 @@ export default function App() {
                 <Route
                   path="/dashboard"
                   element={
-                    <AppLayoutRoute>
+                    <PageLayout title="Dashboard">
                       <DashboardPage />
-                    </AppLayoutRoute>
+                    </PageLayout>
                   }
                 />
                 <Route
                   path="/expenses"
                   element={
-                    <AppLayoutRoute>
+                    <PageLayout title="Expenses">
                       <ExpensesPage />
-                    </AppLayoutRoute>
+                    </PageLayout>
                   }
                 />
               </Route>
@@ -57,9 +71,9 @@ export default function App() {
                 <Route
                   path="/admin"
                   element={
-                    <AppLayoutRoute>
+                    <PageLayout title="Admin dashboard">
                       <AdminPage />
-                    </AppLayoutRoute>
+                    </PageLayout>
                   }
                 />
               </Route>
@@ -71,5 +85,13 @@ export default function App() {
         </AuthProvider>
       </Provider>
     </ThemeProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeModeProvider>
+      <ThemedApp />
+    </ThemeModeProvider>
   );
 }

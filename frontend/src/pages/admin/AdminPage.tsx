@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -24,13 +25,19 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import { adminApi, categoryApi } from "../../api/endpoints";
 import type { AdminInsights, Category } from "../../types";
 import { StatCard } from "../../components/StatCard";
-import { formatCurrency, formatDate } from "../../utils/format";
+import { QuickActionCard } from "../../components/QuickActionCard";
+import { ActivityItem } from "../../components/ActivityItem";
+import { formatCurrency, formatRelativeTime } from "../../utils/format";
 import { getErrorMessage } from "../../utils/errors";
 
 export function AdminPage() {
+  const navigate = useNavigate();
   const [insights, setInsights] = useState<AdminInsights | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -89,29 +96,75 @@ export function AdminPage() {
     }
   };
 
+  const monthShareOfExpenses =
+    insights && insights.totalExpenses > 0 ? (insights.expensesThisMonth / insights.totalExpenses) * 100 : undefined;
+
   return (
     <Stack spacing={3}>
       <Typography variant="h4" sx={{ fontWeight: 700 }}>
-        Admin dashboard
+        Platform overview
       </Typography>
+
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          Quick actions
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(3, minmax(0, 1fr))" },
+            gap: 2,
+          }}
+        >
+          <QuickActionCard
+            highlighted
+            icon={<AddIcon fontSize="large" />}
+            title="Add category"
+            subtitle="Create a new expense category"
+            onClick={openCreate}
+          />
+          <QuickActionCard
+            icon={<ReceiptLongOutlinedIcon fontSize="large" color="primary" />}
+            title="View all expenses"
+            subtitle="Browse every recorded expense"
+            onClick={() => navigate("/expenses")}
+          />
+          <QuickActionCard
+            icon={<RefreshOutlinedIcon fontSize="large" color="primary" />}
+            title="Refresh insights"
+            subtitle="Reload the latest platform stats"
+            onClick={load}
+          />
+        </Box>
+      </Paper>
 
       {insights && (
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr) minmax(0, 1fr)", md: "repeat(4, minmax(0, 1fr))" }, gap: 2 }}>
-          <StatCard label="Registered users" value={insights.totalUsers} icon={<GroupOutlinedIcon color="primary" />} />
+          <StatCard
+            label="Registered users"
+            value={insights.totalUsers}
+            icon={<GroupOutlinedIcon />}
+            accentColor="#1565c0"
+          />
           <StatCard
             label="Expenses recorded"
             value={insights.totalExpenses}
-            icon={<ReceiptLongOutlinedIcon color="primary" />}
+            icon={<ReceiptLongOutlinedIcon />}
+            accentColor="#6a1b9a"
           />
           <StatCard
             label="Total expense value"
             value={formatCurrency(insights.totalExpenseValue)}
-            icon={<PaidOutlinedIcon color="primary" />}
+            icon={<PaidOutlinedIcon />}
+            accentColor="#2e7d32"
           />
           <StatCard
             label="Expenses this month"
             value={insights.expensesThisMonth}
-            icon={<CalendarMonthOutlinedIcon color="primary" />}
+            icon={<CalendarMonthOutlinedIcon />}
+            accentColor="#ef6c00"
+            progress={monthShareOfExpenses}
+            caption={monthShareOfExpenses !== undefined ? `${monthShareOfExpenses.toFixed(0)}% of all-time expenses` : undefined}
           />
         </Box>
       )}
@@ -119,7 +172,9 @@ export function AdminPage() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
         <Paper sx={{ p: 3 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-            <Typography variant="h6">Categories</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Categories
+            </Typography>
             <Button startIcon={<AddIcon />} size="small" onClick={openCreate}>
               Add
             </Button>
@@ -151,7 +206,7 @@ export function AdminPage() {
         </Paper>
 
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Spending per category
           </Typography>
           <Stack spacing={1}>
@@ -172,7 +227,7 @@ export function AdminPage() {
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Top 5 categories
           </Typography>
           <Stack spacing={1}>
@@ -185,7 +240,7 @@ export function AdminPage() {
           </Stack>
         </Paper>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Bottom 5 categories
           </Typography>
           <Stack spacing={1}>
@@ -201,42 +256,50 @@ export function AdminPage() {
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) minmax(0, 1fr)" }, gap: 2 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Recently added expenses
           </Typography>
-          <Stack spacing={1}>
-            {insights?.recentExpenses.map((e) => (
-              <Stack key={e.id} direction="row" sx={{ justifyContent: "space-between" }}>
-                <Stack>
-                  <Typography sx={{ fontWeight: 500 }}>{e.title}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {e.category.name} · {formatDate(e.date)}
+          {insights?.recentExpenses.length === 0 ? (
+            <Typography color="text.secondary">No expenses yet.</Typography>
+          ) : (
+            insights?.recentExpenses.map((e) => (
+              <ActivityItem
+                key={e.id}
+                icon={<ReceiptOutlinedIcon fontSize="small" />}
+                iconColor="#6a1b9a"
+                title={e.title}
+                subtitle={`${e.category.name} · ${formatRelativeTime(e.createdAt)}`}
+                trailing={
+                  <Typography sx={{ fontWeight: 600 }} noWrap>
+                    {formatCurrency(e.amount)}
                   </Typography>
-                </Stack>
-                <Typography sx={{ fontWeight: 600 }}>{formatCurrency(e.amount)}</Typography>
-              </Stack>
-            ))}
-          </Stack>
+                }
+              />
+            ))
+          )}
         </Paper>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Recently registered users
           </Typography>
-          <Stack spacing={1}>
-            {insights?.recentUsers.map((u) => (
-              <Stack key={u.id} direction="row" sx={{ justifyContent: "space-between" }}>
-                <Stack>
-                  <Typography sx={{ fontWeight: 500 }}>{u.name}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {u.email}
+          {insights?.recentUsers.length === 0 ? (
+            <Typography color="text.secondary">No users yet.</Typography>
+          ) : (
+            insights?.recentUsers.map((u) => (
+              <ActivityItem
+                key={u.id}
+                icon={<PersonOutlineOutlinedIcon fontSize="small" />}
+                iconColor="#1565c0"
+                title={u.name}
+                subtitle={u.email}
+                trailing={
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {formatRelativeTime(u.createdAt)}
                   </Typography>
-                </Stack>
-                <Typography variant="caption" color="text.secondary">
-                  {formatDate(u.createdAt)}
-                </Typography>
-              </Stack>
-            ))}
-          </Stack>
+                }
+              />
+            ))
+          )}
         </Paper>
       </Box>
 
