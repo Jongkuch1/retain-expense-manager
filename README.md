@@ -2,10 +2,10 @@
 
 Retain is a full-stack web application for tracking personal expenses and managing monthly budgets, built as a summative project.
 
-**Live app:** _add your deployed frontend URL here, e.g. https://retain-app.netlify.app_
-**Live API:** _add your deployed backend URL here, e.g. https://retain-api.up.railway.app_
+**Live app:** https://retain-expense-manager.netlify.app
+**Live API:** https://retain-backend-zsyu.onrender.com
 
-> Replace the two links above once deployed — the assignment requires the live URL in this README.
+> The backend runs on Render's free tier, which spins down after ~15 minutes of inactivity. The first request after a period of idle may take 30–60 seconds while it wakes back up.
 
 ## Features
 
@@ -74,8 +74,8 @@ Sign-up always creates a regular `USER` — there is no self-service way to beco
 
 ## Deployment
 
-- **Frontend**: deploy `frontend/` to Netlify (build command `npm run build`, publish directory `dist`; `netlify.toml` is included). Set `VITE_API_URL` to your deployed backend's `/api` URL in Netlify's environment variables.
-- **Backend**: deploy `backend/` to Railway (or any Node host) with a managed PostgreSQL addon. Set `DATABASE_URL`, `JWT_SECRET`, and `CORS_ORIGIN` (your Netlify URL) as environment variables. `railway.json` runs `prisma migrate deploy` before starting the server.
+- **Frontend**: deployed to Netlify (build command `npm run build`, publish directory `dist`; see `netlify.toml`). `VITE_API_URL` is set to the backend's `/api` URL in Netlify's environment variables.
+- **Backend**: deployed to Render as a free Node web service, with a managed free-tier PostgreSQL database in the same Render account. Environment variables: `DATABASE_URL` (the database's connection string), `JWT_SECRET`, and `CORS_ORIGIN` (the Netlify URL above). Render runs `npx prisma migrate deploy` before starting the server on every deploy. (`render.yaml` describes this setup as a blueprint; `railway.json` is left over from an earlier attempt at deploying on Railway instead and isn't used.)
 
 ## API overview
 
